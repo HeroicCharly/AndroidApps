@@ -1,0 +1,59 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" tools:context="carlosperez.okaneappv2.log_gastos"
+    android:orientation="vertical"
+    >
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/scrollView"
+        android:layout_gravity="center_horizontal"
+        android:fillViewport="false">
+
+        <TableLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:id="@+id/tblLogGastos">
+
+            <!--Inicia titulos Concepto y Costo-->
+            <TableRow
+                android:background="#ffffe74e"
+                >
+
+                <TextView
+                    android:textStyle="bold"
+                    android:layout_column="1"
+                    android:text="Concepto"
+                    android:padding="3dp"
+                    android:layout_weight="0.5"
+                    android:layout_width="0px"
+                    android:gravity="center"
+                    android:theme="@style/Base.TextAppearance.AppCompat.Headline" />
+
+                <TextView
+                    android:textStyle="bold"
+                    android:layout_column="2"
+                    android:text="Cantidad"
+                    android:padding="3dp"
+                    android:gravity="center"
+                    android:layout_weight=".5"
+                    android:theme="@style/Base.TextAppearance.AppCompat.Headline" />
+
+
+
+            </TableRow>
+            <!-- Fin Concepto y Costo-->
+
+            <TableRow
+                style="@style/CustomRowStyle"
+                android:id="@+id/trBase">
+            </TableRow>
+
+
+
+
+
+        </TableLayout>
+    </ScrollView>
+</LinearLayout>
