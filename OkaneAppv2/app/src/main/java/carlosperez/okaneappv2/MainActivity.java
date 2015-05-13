@@ -1,5 +1,6 @@
 package carlosperez.okaneappv2;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.app.ActionBarActivity;
@@ -19,16 +20,8 @@ import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity {
 
-    static TableLayout logGastos;
-    static TableRow trLogGastos;
-    static Button bttnRegistrarGasto;
-    static EditText txtbxProducto;
-    static EditText txtbxPrecio;
-    static double precio = 0;
-    static String producto = "NP";
-    static boolean cambioColorFondoTabla = false;
-
-    private static Context sContext;
+    private static boolean cambioColorFondoTabla = false;
+    private static Context mainActivityContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +41,7 @@ public class MainActivity extends ActionBarActivity {
 
             fragmentTransaction.commit();
 
-            sContext = getApplicationContext();
+            mainActivityContext = getBaseContext();
         }
     }
 
@@ -76,7 +69,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public static void crearToast(String texto){
-        Context context = getsContext();
+        Context context = mainActivityContext ;
         CharSequence text = texto;
         int duration = Toast.LENGTH_SHORT;
 
@@ -84,11 +77,7 @@ public class MainActivity extends ActionBarActivity {
         toast.show();
     }
 
-    public static Context getsContext(){
-        return sContext;
-    }
-
-    public static class RegistrarGasto extends Fragment {
+    public static class RegistrarGasto extends Fragment implements registrar_gasto.OnFragmentInteractionListener {
 
         public RegistrarGasto() {
         }
@@ -98,38 +87,25 @@ public class MainActivity extends ActionBarActivity {
                                  Bundle savedInstanceState) {
             final View rootView = inflater.inflate(R.layout.fragment_registrar_gasto, container, false);
 
-            //Asignamos el boton a una variable que podamos manejar.
-            bttnRegistrarGasto = (Button)rootView.findViewById(R.id.bttnRegistrarGasto);
+            Button btnRegistrarGasto = (Button)rootView.findViewById(R.id.bttnRegistrarGasto);
 
-            //suscribimos el botón a un listener
-            bttnRegistrarGasto.setOnClickListener(new View.OnClickListener() {
+            btnRegistrarGasto.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    String txtProducto = ((EditText)rootView.findViewById(R.id.txtbxProducto)).getText().toString();
+                    String txtPrecio = ((EditText)rootView.findViewById(R.id.txtbxPrecio)).getText().toString();
 
-                    //Asignamos los botones a una variable que podamos manejar
-                    txtbxProducto = (EditText)rootView.findViewById(R.id.txtbxProducto);
-                    txtbxPrecio = (EditText)rootView.findViewById(R.id.txtbxPrecio);
-
-                    producto = txtbxProducto.getText().toString();
-
-                    //nos aseguramos de que los valores no sean nullo o en vacio
-                    if(producto.equals("") || producto.equals(null)){
-                        //no hacer nada
-                        crearToast("Sin producto");
-                    }else
-                    {
-                        //agregar valores a log_gastos
-                        crearToast(producto+"-"+txtbxPrecio.getText().toString());
-
-                        //mandar a llamar función que agregará a log gastos
-                        if(logGastos != null){
-                            agregarALogGastos(producto,txtbxPrecio.getText().toString());
-                        }
-                    }
+                    //Mandamos el mensaje al Activity que esta implementando el Fragment
+                    registrarGasto(txtProducto,txtPrecio);
                 }
             });
 
             return rootView;
+        }
+
+        @Override
+        public void registrarGasto(String concepto, String precio) {
+            crearToast(concepto);
         }
     }
 
@@ -143,54 +119,8 @@ public class MainActivity extends ActionBarActivity {
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_log_gastos, container, false);
 
-            logGastos = (TableLayout)rootView.findViewById(R.id.tblLogGastos);
-            trLogGastos = (TableRow)rootView.findViewById(R.id.trBase);
-
             return rootView;
         }
     }
 
-    public static void agregarALogGastos(String producto , String precio) {
-
-        //TableRow tableRow = (TableRow)logGastos.findViewById(R.id.trBase);
-        TableRow tableRow = new TableRow(getsContext());
-
-        /*
-        EditText tdConcepto = new EditText(getsContext());
-        EditText tdPrecio = new EditText(getsContext());
-
-        tdConcepto.setText(producto);
-        tdPrecio.setText(precio);
-
-        trLogGastos.addView(tdConcepto);
-        trLogGastos.addView(tdPrecio);
-
-        logGastos.addView(trLogGastos);
-        */
-
-
-
-        EditText tdconcepto = new EditText(getsContext());
-        EditText tdprecio = new EditText(getsContext());
-
-        tdconcepto.setText(producto);
-        tdprecio.setText(precio);
-
-        //Intercalamos el color del fondo de la tabla
-        if (cambioColorFondoTabla) {
-            tdprecio.setBackgroundColor(Color.GRAY);
-            tdconcepto.setBackgroundColor(Color.GRAY);
-            cambioColorFondoTabla = false;
-        } else {
-            tdprecio.setBackgroundColor(Color.WHITE);
-            tdconcepto.setBackgroundColor(Color.WHITE);
-            cambioColorFondoTabla = true;
-        }
-
-        tableRow.addView(tdconcepto);
-        tableRow.addView(tdprecio);
-
-        logGastos.addView(tableRow);
-
-    }
 }
