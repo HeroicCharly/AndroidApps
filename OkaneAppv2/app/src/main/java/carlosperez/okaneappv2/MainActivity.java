@@ -77,6 +77,10 @@ public class MainActivity extends ActionBarActivity {
         toast.show();
     }
 
+    public void addGastoToFragment(){
+        
+    }
+
     public static class RegistrarGasto extends Fragment implements registrar_gasto.OnFragmentInteractionListener {
 
         public RegistrarGasto() {
