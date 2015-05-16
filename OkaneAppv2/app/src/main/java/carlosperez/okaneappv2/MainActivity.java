@@ -15,13 +15,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.List;
 
 
 public class MainActivity extends ActionBarActivity {
 
     private static boolean cambioColorFondoTabla = false;
     private static Context mainActivityContext;
+    private static DataBase DB;
+    private static TextView totalGastado;
+    private static LogGastos logGastos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,19 +38,29 @@ public class MainActivity extends ActionBarActivity {
             android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
             android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-            LogGastos logGastos = new LogGastos();
+            logGastos = new LogGastos();
             RegistrarGasto registrarGasto = new RegistrarGasto();
 
 
             fragmentTransaction.add(R.id.fragmentRegistrarGasto,registrarGasto);
-            fragmentTransaction.add(R.id.fragmentLogGastos,logGastos);
+            fragmentTransaction.add(R.id.fragmentLogGastos, logGastos);
 
             fragmentTransaction.commit();
 
             mainActivityContext = getBaseContext();
+            DB = new DataBase(getApplicationContext());
+
+            totalGastado = (TextView)findViewById(R.id.txtViewTotal);
+            updateTotalGastado();
         }
     }
 
+    //UPDATES
+    public static void updateTotalGastado(){
+        totalGastado.setText("Total:$"+Integer.toString(DB.getTotalGastado()));
+    }
+
+    //FIN UPDATES
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -78,7 +94,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void addGastoToFragment(){
-        
+
     }
 
     public static class RegistrarGasto extends Fragment implements registrar_gasto.OnFragmentInteractionListener {
@@ -100,7 +116,7 @@ public class MainActivity extends ActionBarActivity {
                     String txtPrecio = ((EditText)rootView.findViewById(R.id.txtbxPrecio)).getText().toString();
 
                     //Mandamos el mensaje al Activity que esta implementando el Fragment
-                    registrarGasto(txtProducto,txtPrecio);
+                    registrarGasto(txtProducto, txtPrecio);
                 }
             });
 
@@ -109,8 +125,20 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         public void registrarGasto(String concepto, String precio) {
-            crearToast(concepto);
+            crearToast(concepto + "-" + precio);
+
+            dbGasto nuevoGasto = new dbGasto(1,concepto,precio);
+            DB.createDBGasto(nuevoGasto);
+
+            updateTotalGastado();
+
+            //Limpiamos el texto a registrar
+            EditText dummy = (EditText)getActivity().findViewById(R.id.txtbxProducto);
+            dummy.setText("");
+            dummy = (EditText)getActivity().findViewById(R.id.txtbxPrecio);
+            dummy.setText("");
         }
+
     }
 
     public static class LogGastos extends Fragment {
@@ -123,8 +151,44 @@ public class MainActivity extends ActionBarActivity {
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_log_gastos, container, false);
 
+            //Declaramos los elementos que iran en la tabla
+            TableLayout logGastos = (TableLayout)rootView.findViewById(R.id.tblLogGastos);
+
+            //obtenemos todos los gastos registrados
+            List<dbGasto> listaDeGastos =  DB.getAllGastos();
+
+            //Hacemos un loop para obtener todos los datos de la BD
+            for(dbGasto dummyGasto : listaDeGastos){
+
+                TableRow tableRow = new TableRow(rootView.getContext());
+                EditText tdConcepto = new EditText(rootView.getContext());
+                EditText tdPrecio = new EditText(rootView.getContext());
+
+                tdConcepto.setText(dummyGasto.getConcepto());
+                tdPrecio.setText(dummyGasto.getPrecio());
+
+                //Intercalamos el color de fondo de los renglones
+
+                if(cambioColorFondoTabla){
+                    cambioColorFondoTabla = false;
+                    tdPrecio.setBackgroundColor(Color.GRAY);
+                    tdConcepto.setBackgroundColor(Color.GRAY);
+                }else {
+                    cambioColorFondoTabla = true;
+                    tdPrecio.setBackgroundColor(Color.WHITE);
+                    tdConcepto.setBackgroundColor(Color.WHITE);
+                }
+
+                //Agregamos al renglon los elementos
+                tableRow.addView(tdConcepto);
+                tableRow.addView(tdPrecio);
+
+                logGastos.addView(tableRow);
+            }
+
             return rootView;
         }
+
     }
 
 }
